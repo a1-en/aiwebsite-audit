@@ -17,8 +17,11 @@ import {
     Globe,
     Timer,
     Cpu,
-    Plus
+    Plus,
+    Download
 } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -47,6 +50,35 @@ export default function DashboardPage() {
             opacity: 1,
             transition: { staggerChildren: 0.1 }
         }
+    };
+
+    const handleExportPDF = () => {
+        if (!audits || audits.length === 0) return;
+        const doc = new jsPDF();
+
+        doc.setFontSize(20);
+        doc.text("Intelligence Audit History", 14, 22);
+        doc.setFontSize(11);
+        doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 30);
+
+        const tableData = audits.map((audit: any) => [
+            new URL(audit.url).hostname,
+            audit.performanceScore.toString(),
+            audit.seoScore.toString(),
+            audit.securityScore.toString(),
+            audit.techStack?.slice(0, 3).join(", ") || "N/A",
+            new Date(audit.createdAt).toLocaleDateString()
+        ]);
+
+        autoTable(doc, {
+            head: [['Website Entity', 'Performance', 'SEO Health', 'Security', 'Tech Stack', 'Date Detected']],
+            body: tableData,
+            startY: 40,
+            styles: { fontSize: 10, cellPadding: 4 },
+            headStyles: { fillColor: [59, 130, 246] },
+        });
+
+        doc.save("intelligence_audit_history.pdf");
     };
 
     return (
@@ -106,9 +138,19 @@ export default function DashboardPage() {
                         </div>
                         <h2 className="text-2xl font-bold text-white tracking-tight">Recent Scans</h2>
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] text-slate-500 font-bold uppercase tracking-widest bg-slate-800/50 px-4 py-2 rounded-full border border-slate-700/50">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                        Real-time Activity
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={handleExportPDF}
+                            disabled={!audits || audits.length === 0}
+                            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600/10 hover:bg-blue-600/20 text-blue-500 border border-blue-500/20 rounded-xl transition-all font-bold text-[10px] uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed group"
+                        >
+                            <Download className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
+                            Export PDF
+                        </button>
+                        <div className="hidden sm:flex items-center gap-2 text-[10px] text-slate-500 font-bold uppercase tracking-widest bg-slate-800/50 px-4 py-2 rounded-full border border-slate-700/50">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                            Real-time Activity
+                        </div>
                     </div>
                 </div>
 

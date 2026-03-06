@@ -54,25 +54,35 @@ export default function Navbar() {
                                 exit={{ opacity: 0, x: 10 }}
                                 className="flex items-center gap-4"
                             >
-                                <div className="hidden sm:flex flex-col items-end">
-                                    <span className="text-[10px] font-bold text-blue-500 uppercase tracking-widest flex items-center gap-1.5">
-                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse" />
-                                        Agent Online
-                                    </span>
-                                    <span className="text-[9px] font-medium text-slate-500 uppercase tracking-widest mt-1 truncate max-w-[100px]">
-                                        {session.user?.name}
-                                    </span>
-                                </div>
+
 
                                 <div className="w-px h-8 bg-slate-800 hidden sm:block mx-1" />
 
                                 <div className="flex items-center gap-2">
-                                    <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 p-0.5 flex items-center justify-center overflow-hidden">
-                                        {session.user?.image ? (
-                                            <img src={session.user.image} alt="User" className="w-full h-full rounded-lg object-cover" />
-                                        ) : (
-                                            <User className="w-5 h-5 text-slate-500" />
-                                        )}
+                                    <div className="group/user relative">
+                                        <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 p-0.5 flex items-center justify-center overflow-hidden cursor-pointer hover:border-blue-500/50 transition-all shadow-sm group-hover/user:shadow-blue-500/20">
+                                            {session.user?.image ? (
+                                                <img src={session.user.image} alt="User" className="w-full h-full rounded-lg object-cover" />
+                                            ) : (
+                                                <User className="w-5 h-5 text-slate-500 group-hover/user:text-blue-400 transition-colors" />
+                                            )}
+                                        </div>
+                                        <div className="absolute top-[calc(100%+0.5rem)] right-0 w-56 bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl p-4 opacity-0 invisible group-hover/user:opacity-100 group-hover/user:visible transition-all duration-300 translate-y-2 group-hover/user:translate-y-0 z-[100]">
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <div className="p-2 bg-blue-500/10 rounded-lg">
+                                                    <User className="w-4 h-4 text-blue-500" />
+                                                </div>
+                                                <div className="flex flex-col overflow-hidden">
+                                                    <span className="text-white font-bold text-sm truncate leading-tight">{session.user?.name}</span>
+                                                    <span className="text-slate-400 text-[11px] truncate">{session.user?.email}</span>
+                                                </div>
+                                            </div>
+                                            <div className="w-full h-px bg-slate-800/50 my-2" />
+                                            <div className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-green-500">
+                                                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                                                System Access Granted
+                                            </div>
+                                        </div>
                                     </div>
                                     <motion.button
                                         whileHover={{ scale: 1.05 }}

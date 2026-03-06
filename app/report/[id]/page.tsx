@@ -168,8 +168,36 @@ export default function ReportPage() {
                             </div>
                         </div>
                         <div className="p-8 lg:p-10">
-                            <div className="prose prose-invert prose-blue max-w-none markdown-content">
-                                <ReactMarkdown>{audit.aiReport}</ReactMarkdown>
+                            <div className="markdown-content">
+                                <ReactMarkdown
+                                    components={{
+                                        h1: ({ node, ...props }) => {
+                                            const text = String(props.children).replace(/^#\s*/, '');
+                                            return <h1 className="text-3xl font-black text-white mt-10 mb-6 border-l-4 border-blue-500 pl-4">{text}</h1>
+                                        },
+                                        h2: ({ node, ...props }) => {
+                                            const text = String(props.children).replace(/^##\s*/, '');
+                                            return <h2 className="text-2xl font-bold text-slate-100 mt-8 mb-4 flex items-center gap-2 border-b border-slate-800 pb-2">{text}</h2>
+                                        },
+                                        h3: ({ node, ...props }) => {
+                                            const text = String(props.children).replace(/^###\s*/, '');
+                                            return <h3 className="text-xl font-semibold text-blue-300 mt-6 mb-3">{text}</h3>
+                                        },
+                                        p: ({ node, ...props }) => <p className="text-slate-400 mb-5 leading-relaxed text-base">{props.children}</p>,
+                                        ul: ({ node, ...props }) => <ul className="mb-6 space-y-3 pl-2">{props.children}</ul>,
+                                        li: ({ node, ...props }) => (
+                                            <li className="flex gap-3 text-slate-300 items-start">
+                                                <span className="text-blue-500 font-bold mt-0.5 shrink-0">→</span>
+                                                <span>{props.children}</span>
+                                            </li>
+                                        ),
+                                        strong: ({ node, ...props }) => <strong className="text-white font-bold">{props.children}</strong>,
+                                        blockquote: ({ node, ...props }) => <blockquote className="border-l-[3px] border-indigo-500 pl-6 py-3 my-8 italic text-slate-400 bg-indigo-500/5 rounded-r-2xl">{props.children}</blockquote>,
+                                        a: ({ node, ...props }) => <a href={props.href} target="_blank" rel="noreferrer" className="text-blue-400 hover:text-blue-300 border-b border-dashed border-blue-500/50 hover:border-solid hover:border-blue-400 pb-0.5 transition-all">{props.children}</a>
+                                    }}
+                                >
+                                    {audit.aiReport}
+                                </ReactMarkdown>
                             </div>
                         </div>
                     </section>
@@ -277,16 +305,18 @@ export default function ReportPage() {
             </div>
 
             <style jsx global>{`
-        .markdown-content h1 { font-size: 1.75rem; font-weight: 800; margin-top: 2.5rem; margin-bottom: 1.25rem; color: white; border-left: 4px solid #3b82f6; padding-left: 1rem; }
-        .markdown-content h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; color: #f8fafc; display: flex; align-items: center; gap: 0.5rem; }
-        .markdown-content h3 { font-size: 1.2rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; color: #f1f5f9; }
-        .markdown-content p { margin-bottom: 1.25rem; color: #94a3b8; line-height: 1.8; font-size: 1.05rem; }
-        .markdown-content ul { margin-bottom: 1.5rem; list-style-type: none; padding-left: 0.5rem; }
-        .markdown-content li { margin-bottom: 0.75rem; display: flex; gap: 0.75rem; align-items: start; color: #cbd5e1; }
-        .markdown-content li::before { content: "→"; color: #3b82f6; font-weight: bold; flex-shrink: 0; }
-        .markdown-content strong { color: white; font-weight: 700; }
-        .markdown-content code { background: #1e293b; padding: 0.2rem 0.4rem; rounded: 0.4rem; color: #60a5fa; font-size: 0.9em; }
-        .markdown-content blockquote { border-left: 3px solid #6366f1; padding-left: 1.5rem; margin: 2rem 0; font-style: italic; color: #e2e8f0; }
+        .markdown-content h1 { font-size: 1.75rem !important; font-weight: 800 !important; margin-top: 2.5rem !important; margin-bottom: 1.25rem !important; color: white !important; border-left: 4px solid #3b82f6 !important; padding-left: 1rem !important; }
+        .markdown-content h2 { font-size: 1.5rem !important; font-weight: 700 !important; margin-top: 2rem !important; margin-bottom: 1rem !important; color: #f8fafc !important; display: flex !important; align-items: center !important; gap: 0.5rem !important; border-bottom: 1px solid #1e293b !important; padding-bottom: 0.5rem !important; }
+        .markdown-content h3 { font-size: 1.2rem !important; font-weight: 600 !important; margin-top: 1.5rem !important; margin-bottom: 0.75rem !important; color: #93c5fd !important; }
+        .markdown-content p { margin-bottom: 1.25rem !important; color: #94a3b8 !important; line-height: 1.8 !important; font-size: 1rem !important; }
+        .markdown-content ul { margin-bottom: 1.5rem !important; list-style-type: none !important; padding-left: 0.5rem !important; }
+        .markdown-content li { margin-bottom: 0.75rem !important; display: flex !important; gap: 0.75rem !important; align-items: start !important; color: #cbd5e1 !important; }
+        .markdown-content li::before { content: "→" !important; color: #3b82f6 !important; font-weight: bold !important; flex-shrink: 0 !important; }
+        .markdown-content strong { color: #f1f5f9 !important; font-weight: 700 !important; }
+        .markdown-content code { background: #0f172a !important; padding: 0.2rem 0.4rem !important; border-radius: 0.4rem !important; color: #60a5fa !important; font-size: 0.9em !important; border: 1px solid #1e293b !important; }
+        .markdown-content blockquote { border-left: 3px solid #6366f1 !important; padding-left: 1.5rem !important; margin: 2rem 0 !important; font-style: italic !important; color: #94a3b8 !important; background: rgba(99, 102, 241, 0.05) !important; padding-top: 1rem !important; padding-bottom: 1rem !important; border-radius: 0 1rem 1rem 0 !important; }
+        .markdown-content a { color: #60a5fa !important; text-decoration: none !important; border-bottom: 1px dashed #3b82f6 !important; transition: all 0.2s !important; }
+        .markdown-content a:hover { color: #93c5fd !important; border-bottom-style: solid !important; }
       `}</style>
         </div>
     );

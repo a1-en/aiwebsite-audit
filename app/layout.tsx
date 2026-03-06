@@ -40,7 +40,7 @@ export default function RootLayout({
               © {new Date().getFullYear()} AI Audit Agent. All rights reserved.
             </footer>
           </div>
-          <Toaster position="top-center" expand={true} richColors invert theme="dark" />
+          <Toaster position="bottom-right" expand={true} richColors invert theme="dark" />
         </Providers>
       </body>
     </html>

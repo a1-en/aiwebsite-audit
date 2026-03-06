@@ -1,9 +1,17 @@
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import { authConfig } from "./auth.config";
+
+class UserNotFoundError extends CredentialsSignin {
+    code = "UserNotExist";
+}
+
+class InvalidPasswordError extends CredentialsSignin {
+    code = "InvalidCredentials";
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig,
@@ -21,14 +29,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
                 const user = await User.findOne({ email: credentials.email }).select("+password");
 
-                if (!user || !user.password) return null;
+                if (!user || !user.password) {
+                    throw new UserNotFoundError();
+                }
 
                 const isValid = await bcrypt.compare(
                     credentials.password as string,
                     user.password
                 );
 
-                if (!isValid) return null;
+                if (!isValid) {
+                    throw new InvalidPasswordError();
+                }
 
                 return {
                     id: user._id.toString(),

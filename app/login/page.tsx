@@ -30,7 +30,15 @@ export default function LoginPage() {
             });
 
             if (result?.error) {
-                toast.error("Invalid credentials. Please try again.");
+                if (result.error === "Configuration" || result.error === "UserNotExist") { // NextAuth v5 sometimes returns 'Configuration' for custom subclasses depending on the internal catch
+                    toast.error("User does not exist. Please register an agent profile.");
+                } else if (result.error === "InvalidCredentials") {
+                    toast.error("Invalid access key. Please verify your credentials.");
+                } else {
+                    // Fallback to exactly what the user wanted: if there is any error, display the "user does not exist / invalid creds" msg
+                    // Since next auth sometimes obfuscates the specific subclass when thrown. 
+                    toast.error(result.error === "CredentialsSignin" ? "Invalid credentials. User may not exist." : "User does not exist. Please register.");
+                }
             } else {
                 toast.success("Identity verified! Welcome back.");
                 router.push(callbackUrl);

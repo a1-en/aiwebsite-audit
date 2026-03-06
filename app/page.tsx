@@ -23,7 +23,7 @@ export default function LandingPage() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[800px] bg-gradient-to-b from-blue-600/10 via-slate-950 to-slate-950 -z-10" />
 
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-6 pt-24 pb-32 sm:pt-32 lg:flex lg:items-center lg:gap-x-10 lg:px-8 lg:pt-40">
+      <div className="max-w-7xl mx-auto px-6 pt-12 pb-24 sm:pt-16 lg:flex lg:items-center lg:gap-x-10 lg:px-8 lg:pt-20">
         <div className="mx-auto max-w-2xl lg:mx-0 lg:flex-auto">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -38,7 +38,7 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-5xl font-black tracking-tighter text-white sm:text-8xl mb-8 leading-[0.9]"
+            className="text-5xl font-black tracking-tighter text-white sm:text-6xl lg:text-7xl mb-6 leading-[0.9]"
           >
             Surface The <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-600">Invisible</span> Truth.
