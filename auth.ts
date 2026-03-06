@@ -23,30 +23,42 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 password: { label: "Password", type: "password" },
             },
             async authorize(credentials) {
-                if (!credentials?.email || !credentials?.password) return null;
+                try {
+                    if (!credentials?.email || !credentials?.password) {
+                        return null;
+                    }
 
-                await dbConnect();
+                    await dbConnect();
 
-                const user = await User.findOne({ email: credentials.email }).select("+password");
+                    const user = await User.findOne({ email: credentials.email }).select("+password");
 
-                if (!user || !user.password) {
-                    throw new UserNotFoundError();
+                    if (!user || !user.password) {
+                        throw new UserNotFoundError();
+                    }
+
+                    const isValid = await bcrypt.compare(
+                        credentials.password as string,
+                        user.password
+                    );
+
+                    if (!isValid) {
+                        throw new InvalidPasswordError();
+                    }
+
+                    return {
+                        id: user._id.toString(),
+                        name: user.name,
+                        email: user.email,
+                    };
+                } catch (error) {
+                    console.error("Auth Error:", error);
+
+                    if (error instanceof CredentialsSignin) {
+                        throw error;
+                    }
+
+                    return null;
                 }
-
-                const isValid = await bcrypt.compare(
-                    credentials.password as string,
-                    user.password
-                );
-
-                if (!isValid) {
-                    throw new InvalidPasswordError();
-                }
-
-                return {
-                    id: user._id.toString(),
-                    name: user.name,
-                    email: user.email,
-                };
             },
         }),
     ],

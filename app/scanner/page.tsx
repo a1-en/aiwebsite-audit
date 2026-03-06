@@ -90,7 +90,7 @@ export default function ScannerPage() {
                                     type="text"
                                     placeholder="Paste your URL (e.g., https://example.com)"
                                     className={cn(
-                                        "w-full bg-slate-900 border border-slate-700/50 rounded-2xl py-6 px-7 pl-16 text-white text-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all shadow-[0_0_50px_-12px_rgba(59,130,246,0.3)]",
+                                        "w-full bg-slate-900 border border-slate-700/50 rounded-2xl py-6 px-7 pl-16 pr-32 sm:pr-40 text-white text-sm sm:text-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all shadow-[0_0_50px_-12px_rgba(59,130,246,0.3)]",
                                         mutation.isPending && "opacity-50 cursor-not-allowed"
                                     )}
                                     value={url}

@@ -158,13 +158,13 @@ export default function LandingPage() {
           <motion.div
             whileInView={{ opacity: 1, scale: 1 }}
             initial={{ opacity: 0, scale: 0.95 }}
-            className="p-16 bg-gradient-to-b from-blue-700 to-indigo-900 rounded-[3rem] shadow-2xl relative overflow-hidden"
+            className="p-8 sm:p-16 bg-gradient-to-b from-blue-700 to-indigo-900 rounded-[2rem] sm:rounded-[3rem] shadow-2xl relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 blur-3xl -translate-y-1/2 translate-x-1/2 rounded-full" />
-            <h4 className="text-4xl font-black text-white tracking-tighter mb-8">Ready to audit your future?</h4>
+            <h4 className="text-3xl sm:text-4xl font-black text-white tracking-tighter mb-8 max-w-lg mx-auto leading-tight">Ready to audit your future?</h4>
             <Link
               href="/login"
-              className="px-12 py-5 bg-white text-slate-950 font-black rounded-2xl inline-flex items-center gap-4 transition-all hover:scale-105 hover:bg-slate-100 shadow-xl"
+              className="w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-5 bg-white text-slate-950 font-black rounded-2xl flex sm:inline-flex items-center justify-center gap-4 transition-all hover:scale-105 hover:bg-slate-100 shadow-xl"
             >
               Get Started Now
               <ArrowRight className="w-6 h-6" />

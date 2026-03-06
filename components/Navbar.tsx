@@ -9,15 +9,19 @@ import {
     History,
     LogOut,
     User,
-    ShieldCheck
+    ShieldCheck,
+    Menu,
+    X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession, signOut } from "next-auth/react";
 
 export default function Navbar() {
     const pathname = usePathname();
     const { data: session, status } = useSession();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
         <nav className="sticky top-0 z-[100] w-full bg-[#020617]/70 backdrop-blur-xl border-b border-white/5 py-4">
@@ -45,7 +49,13 @@ export default function Navbar() {
                     )}
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 sm:gap-4">
+                    <button
+                        className="md:hidden p-2 text-slate-400 hover:text-white transition-colors"
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    >
+                        {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                    </button>
                     <AnimatePresence mode="wait">
                         {status === "authenticated" ? (
                             <motion.div
@@ -115,7 +125,42 @@ export default function Navbar() {
                     </AnimatePresence>
                 </div>
             </div>
+
+            {/* Mobile Menu Overlay */}
+            <AnimatePresence>
+                {mobileMenuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="md:hidden absolute top-full left-0 w-full bg-[#020617]/95 backdrop-blur-xl border-b border-white/5 py-4 px-6 flex flex-col gap-2 shadow-2xl"
+                    >
+                        <MobileNavLink href="/" active={pathname === "/"} onClick={() => setMobileMenuOpen(false)}>Mission</MobileNavLink>
+                        {session && (
+                            <>
+                                <MobileNavLink href="/scanner" active={pathname === "/scanner"} onClick={() => setMobileMenuOpen(false)}>Audit Scanner</MobileNavLink>
+                                <MobileNavLink href="/dashboard" active={pathname === "/dashboard"} onClick={() => setMobileMenuOpen(false)}>Audit History</MobileNavLink>
+                            </>
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </nav>
+    );
+}
+
+function MobileNavLink({ href, active, children, onClick }: { href: string; active: boolean; children: React.ReactNode; onClick: () => void }) {
+    return (
+        <Link
+            href={href}
+            onClick={onClick}
+            className={cn(
+                "px-4 py-3 rounded-xl text-sm font-black uppercase tracking-widest transition-all",
+                active ? "bg-blue-600/10 text-blue-500 border border-blue-500/20" : "text-slate-400 hover:bg-slate-900 hover:text-white"
+            )}
+        >
+            {children}
+        </Link>
     );
 }
 
