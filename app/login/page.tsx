@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { ShieldCheck, Mail, Lock, Loader2, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 
-export default function LoginPage() {
+function LoginContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const callbackUrl = searchParams.get("callbackUrl") || "/scanner";
@@ -134,5 +134,14 @@ export default function LoginPage() {
                 </div>
             </motion.div>
         </div>
+    );
+}
+
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={<div className="min-h-[calc(100vh-80px)] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-blue-500" /></div>}>
+            <LoginContent />
+        </Suspense>
     );
 }
