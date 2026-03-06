@@ -11,13 +11,8 @@ export const GET = auth(async function GET(req: any) {
     try {
         await dbConnect();
 
-        // Sort by most recent first, filtered by user (or legacy audits)
-        const audits = await Audit.find({
-            $or: [
-                { userId: req.auth.user.id },
-                { userId: { $exists: false } }
-            ]
-        }).sort({ createdAt: -1 }).limit(20);
+        // Sort by most recent first, strictly filtered by logged-in user
+        const audits = await Audit.find({ userId: req.auth.user.id }).sort({ createdAt: -1 }).limit(20);
 
         return NextResponse.json(audits, { status: 200 });
     } catch (error: any) {
