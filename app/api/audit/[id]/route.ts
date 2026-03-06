@@ -4,10 +4,12 @@ import Audit from "@/models/Audit";
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    let resolvedParams;
     try {
-        const { id } = await params;
+        resolvedParams = await params;
+        const { id } = resolvedParams;
         await dbConnect();
 
         const audit = await Audit.findById(id);
@@ -18,7 +20,7 @@ export async function GET(
 
         return NextResponse.json(audit, { status: 200 });
     } catch (error: any) {
-        console.error(`API Error - /api/audit/${params.id}:`, error.message);
+        console.error(`API Error - /api/audit/${resolvedParams?.id}:`, error.message);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
