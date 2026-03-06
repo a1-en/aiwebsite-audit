@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IAudit extends Document {
     url: string;
+    userId: string;
     performanceScore: number;
     seoScore: number;
     accessibilityScore: number;
@@ -42,6 +43,7 @@ export interface IAudit extends Document {
 const AuditSchema: Schema = new Schema(
     {
         url: { type: String, required: true },
+        userId: { type: String, required: true },
         performanceScore: { type: Number, default: 0 },
         seoScore: { type: Number, default: 0 },
         accessibilityScore: { type: Number, default: 0 },

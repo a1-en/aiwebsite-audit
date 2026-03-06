@@ -7,7 +7,7 @@ import { detectTechnologies } from "./techDetector";
 import { generateAiReport } from "@/lib/openai";
 import axios from "axios";
 
-export async function runFullAudit(url: string) {
+export async function runFullAudit(url: string, userId: string) {
     try {
         await dbConnect();
 
@@ -60,6 +60,7 @@ export async function runFullAudit(url: string) {
         // Save to Database
         const audit = new Audit({
             ...auditResults,
+            userId,
             aiReport: aiReportMarkdown,
         });
 

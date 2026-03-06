@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, Loader2, Zap, Shield, SearchCode, Accessibility } from "lucide-react";
 import axios from "axios";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,7 @@ import { toast } from "sonner";
 export default function ScannerPage() {
     const [url, setUrl] = useState("");
     const router = useRouter();
+    const queryClient = useQueryClient();
 
     const mutation = useMutation({
         mutationFn: async (targetUrl: string) => {
@@ -22,11 +23,13 @@ export default function ScannerPage() {
             toast.loading("Analyzing website performance and SEO...", { id: "audit-toast" });
         },
         onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ["history"] });
             toast.success("Audit completed successfully!", { id: "audit-toast" });
             router.push(`/report/${data._id}`);
         },
-        onError: () => {
-            toast.error("Audit failed. The URL might be unreachable or restricted.", { id: "audit-toast" });
+        onError: (error: any) => {
+            const message = error.response?.data?.error || "Audit failed. The URL might be unreachable or restricted.";
+            toast.error(message, { id: "audit-toast" });
         }
     });
 
@@ -124,7 +127,7 @@ export default function ScannerPage() {
                                 exit={{ opacity: 0, height: 0 }}
                                 className="mt-4 text-red-400 text-sm font-medium"
                             >
-                                Audit failed. Please ensure the URL is correct and public.
+                                {(mutation.error as any).response?.data?.error || "Audit failed. Please ensure the URL is correct and public."}
                             </motion.p>
                         )}
                     </AnimatePresence>
