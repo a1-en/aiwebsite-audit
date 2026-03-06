@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { runFullAudit } from "@/services/auditAgent";
+import { auth } from "@/auth";
 
-export async function POST(req: NextRequest) {
+export const POST = auth(async function POST(req: any) {
+    if (!req.auth) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     try {
         const { url } = await req.json();
 
@@ -16,4 +21,4 @@ export async function POST(req: NextRequest) {
         console.error("API Error - /api/audit:", error.message);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
-}
+});

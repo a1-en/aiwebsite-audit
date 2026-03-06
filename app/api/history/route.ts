@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Audit from "@/models/Audit";
+import { auth } from "@/auth";
 
-export async function GET(req: NextRequest) {
+export const GET = auth(async function GET(req: any) {
+    if (!req.auth) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     try {
         await dbConnect();
 
@@ -14,4 +19,4 @@ export async function GET(req: NextRequest) {
         console.error("API Error - /api/history:", error.message);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
-}
+});
