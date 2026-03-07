@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, Loader2, Zap, Shield, SearchCode, Accessibility } from "lucide-react";
@@ -9,10 +9,18 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
+const LOADING_MESSAGES = [
+    "Analyzing website performance and SEO...",
+    "Scanning for security vulnerabilities...",
+    "Running AI-powered accessibility checks...",
+];
+
 export default function ScannerPage() {
     const [url, setUrl] = useState("");
     const router = useRouter();
     const queryClient = useQueryClient();
+    const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const msgIndexRef = useRef(0);
 
     const mutation = useMutation({
         mutationFn: async (targetUrl: string) => {
@@ -20,14 +28,22 @@ export default function ScannerPage() {
             return response.data;
         },
         onMutate: () => {
-            toast.loading("Analyzing website performance and SEO...", { id: "audit-toast" });
+            msgIndexRef.current = 0;
+            toast.loading(LOADING_MESSAGES[0], { id: "audit-toast" });
+
+            loadingIntervalRef.current = setInterval(() => {
+                msgIndexRef.current = (msgIndexRef.current + 1) % LOADING_MESSAGES.length;
+                toast.loading(LOADING_MESSAGES[msgIndexRef.current], { id: "audit-toast" });
+            }, 3000);
         },
         onSuccess: (data) => {
+            if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
             queryClient.invalidateQueries({ queryKey: ["history"] });
             toast.success("Audit completed successfully!", { id: "audit-toast" });
             router.push(`/report/${data._id}`);
         },
         onError: (error: any) => {
+            if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
             const message = error.response?.data?.error || "Audit failed. The URL might be unreachable or restricted.";
             toast.error(message, { id: "audit-toast" });
         }
