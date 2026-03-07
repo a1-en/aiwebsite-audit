@@ -16,6 +16,20 @@ export interface PageSpeedResult {
     };
 }
 
+/** Fallback result returned when PSI times out or fails */
+const PSI_FALLBACK: PageSpeedResult = {
+    performanceScore: 0,
+    accessibilityScore: 0,
+    bestPracticesScore: 0,
+    seoScore: 0,
+    details: {
+        lcp: "N/A",
+        cls: "N/A",
+        loadTime: "N/A",
+        totalByteSize: 0,
+    },
+};
+
 export async function fetchPageSpeedData(url: string): Promise<PageSpeedResult> {
     try {
         const response = await axios.get(PSI_URL, {
@@ -23,8 +37,10 @@ export async function fetchPageSpeedData(url: string): Promise<PageSpeedResult> 
                 url: url,
                 key: PAGESPEED_API_KEY,
                 category: ["performance", "accessibility", "best-practices", "seo"],
-                strategy: "desktop", // we can use mobile if preferred
+                strategy: "desktop",
             },
+            // Strict timeout — PSI can be very slow and cause 504s on serverless
+            timeout: 8000,
         });
 
         const data = response.data.lighthouseResult;
@@ -44,7 +60,9 @@ export async function fetchPageSpeedData(url: string): Promise<PageSpeedResult> 
             },
         };
     } catch (error: any) {
-        console.error("PageSpeed API Error:", error.response?.data || error.message);
-        throw new Error("Failed to fetch reports from Google PageSpeed Insights.");
+        // Return fallback scores instead of throwing — keeps the audit alive
+        // even when PSI is slow or unreachable from the serverless environment
+        console.warn("PageSpeed API timed-out or failed — using fallback scores.", error.message);
+        return PSI_FALLBACK;
     }
 }

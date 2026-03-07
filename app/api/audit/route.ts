@@ -4,6 +4,11 @@ import { auth } from "@/auth";
 import dbConnect from "@/lib/mongodb";
 import Audit from "@/models/Audit";
 
+// Tell Netlify/Next.js this function may run up to 60 seconds.
+// Without this, Netlify's default serverless timeout is 10s and
+// will return a 504 for slow PSI + GPT-4o responses.
+export const maxDuration = 60;
+
 export const POST = auth(async function POST(req: any) {
     if (!req.auth || !req.auth.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

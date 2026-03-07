@@ -2,6 +2,8 @@ import OpenAI from "openai";
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
+    // Prevent the OpenAI call from hanging indefinitely and causing a 504
+    timeout: 30000,
 });
 
 export async function generateAiReport(auditData: any): Promise<string> {
