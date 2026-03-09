@@ -83,7 +83,8 @@ export async function runFullAudit(url: string, userId: string) {
         // Run Scanners in Parallel (Performance is the longest so we run it alongside)
         const scannersStart = Date.now();
         const [psiDataRaw, seoData, securityData] = await Promise.all([
-            withTimeout(fetchPageSpeedData(formattedUrl), 5000, "fetchPageSpeedData"),
+            // Give PageSpeed more time than before so core vitals are more likely to be present
+            withTimeout(fetchPageSpeedData(formattedUrl), 9000, "fetchPageSpeedData"),
             scanSeo(formattedUrl),
             scanSecurity(formattedUrl),
         ]);
@@ -131,11 +132,11 @@ export async function runFullAudit(url: string, userId: string) {
             auditResults.seoScore = psiData.seoScore;
         }
 
-        // Generate AI Report
+        // Generate AI Report (shorter timeout than PageSpeed; metrics are more important than prose)
         const aiStart = Date.now();
         const aiReportMarkdownRaw = await withTimeout(
             generateAiReport(auditResults),
-            8000,
+            5000,
             "generateAiReport"
         );
         const aiReportMarkdown =
