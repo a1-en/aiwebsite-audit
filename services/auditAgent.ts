@@ -132,11 +132,11 @@ export async function runFullAudit(url: string, userId: string) {
             auditResults.seoScore = psiData.seoScore;
         }
 
-        // Generate AI Report (shorter timeout than PageSpeed; metrics are more important than prose)
+        // Generate AI Report (still timeboxed, but longer so full report usually comes through)
         const aiStart = Date.now();
         const aiReportMarkdownRaw = await withTimeout(
             generateAiReport(auditResults),
-            5000,
+            15000,
             "generateAiReport"
         );
         const aiReportMarkdown =
