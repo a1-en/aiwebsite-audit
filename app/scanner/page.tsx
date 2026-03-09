@@ -22,12 +22,54 @@ export default function ScannerPage() {
     const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const msgIndexRef = useRef(0);
 
+    const auditRequest = async (targetUrl: string, attempt = 1): Promise<any> => {
+        try {
+            console.log("[Scanner] Starting auditRequest", {
+                targetUrl,
+                attempt,
+                time: new Date().toISOString(),
+            });
+            const response = await axios.post("/api/audit", { url: targetUrl });
+            console.log("[Scanner] auditRequest success", {
+                status: response.status,
+                attempt,
+                time: new Date().toISOString(),
+            });
+            return response.data;
+        } catch (error: any) {
+            console.error("[Scanner] auditRequest error", {
+                attempt,
+                time: new Date().toISOString(),
+                message: error?.message,
+                code: error?.code,
+                status: error?.response?.status,
+                responseData: error?.response?.data,
+            });
+            const status = error?.response?.status;
+            const isNetworkError = !error?.response;
+            const isServerError = status && status >= 500;
+
+            if (attempt < 2 && (isNetworkError || isServerError)) {
+                return auditRequest(targetUrl, attempt + 1);
+            }
+
+            throw error;
+        }
+    };
+
     const mutation = useMutation({
         mutationFn: async (targetUrl: string) => {
-            const response = await axios.post("/api/audit", { url: targetUrl });
-            return response.data;
+            console.log("[Scanner] mutation.mutationFn called", {
+                targetUrl,
+                time: new Date().toISOString(),
+            });
+            return auditRequest(targetUrl);
         },
-        onMutate: () => {
+        onMutate: (targetUrl: string) => {
+            console.log("[Scanner] onMutate", {
+                targetUrl,
+                time: new Date().toISOString(),
+            });
             msgIndexRef.current = 0;
             toast.loading(LOADING_MESSAGES[0], { id: "audit-toast" });
 
@@ -37,12 +79,23 @@ export default function ScannerPage() {
             }, 3000);
         },
         onSuccess: (data) => {
+            console.log("[Scanner] onSuccess", {
+                reportId: data?._id,
+                time: new Date().toISOString(),
+            });
             if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
             queryClient.invalidateQueries({ queryKey: ["history"] });
             toast.success("Audit completed successfully!", { id: "audit-toast" });
             router.push(`/report/${data._id}`);
         },
         onError: (error: any) => {
+            console.error("[Scanner] onError", {
+                time: new Date().toISOString(),
+                message: error?.message,
+                code: error?.code,
+                status: error?.response?.status,
+                responseData: error?.response?.data,
+            });
             if (loadingIntervalRef.current) clearInterval(loadingIntervalRef.current);
             const message = error.response?.data?.error || "Audit failed. The URL might be unreachable or restricted.";
             toast.error(message, { id: "audit-toast" });
