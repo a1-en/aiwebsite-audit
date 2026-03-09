@@ -7,6 +7,25 @@ import { detectTechnologies } from "./techDetector";
 import { generateAiReport } from "@/lib/openai";
 import axios from "axios";
 
+async function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T | null> {
+    return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+            console.warn(`[AuditAgent] ${label} timed out after ${ms}ms`);
+            resolve(null);
+        }, ms);
+
+        promise
+            .then((value) => {
+                clearTimeout(timer);
+                resolve(value);
+            })
+            .catch((err) => {
+                clearTimeout(timer);
+                reject(err);
+            });
+    });
+}
+
 export async function runFullAudit(url: string, userId: string) {
     try {
         console.log("[AuditAgent] runFullAudit called", {
@@ -33,31 +52,53 @@ export async function runFullAudit(url: string, userId: string) {
 
         // Fetch HTML for SEO & Tech Detection
         const preHtml = Date.now();
-        const { data: html, headers } = await axios.get(formattedUrl, {
-            headers: {
-                "User-Agent":
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-            },
-            timeout: 10000,
-        });
-        console.log("[AuditAgent] Initial HTML fetch completed", {
-            formattedUrl,
-            durationMs: Date.now() - preHtml,
-            contentLength: typeof html === "string" ? html.length : undefined,
-            time: new Date().toISOString(),
-        });
+        let html: any = "";
+        let headers: any = {};
+        try {
+            const htmlResp = await axios.get(formattedUrl, {
+                headers: {
+                    "User-Agent":
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+                },
+                timeout: 5000,
+            });
+            html = htmlResp.data;
+            headers = htmlResp.headers;
+            console.log("[AuditAgent] Initial HTML fetch completed", {
+                formattedUrl,
+                durationMs: Date.now() - preHtml,
+                contentLength: typeof html === "string" ? html.length : undefined,
+                time: new Date().toISOString(),
+            });
+        } catch (err: any) {
+            console.warn("[AuditAgent] Initial HTML fetch failed, continuing without HTML", {
+                formattedUrl,
+                durationMs: Date.now() - preHtml,
+                message: err?.message,
+                code: err?.code,
+                time: new Date().toISOString(),
+            });
+        }
 
         // Run Scanners in Parallel (Performance is the longest so we run it alongside)
         const scannersStart = Date.now();
-        const [psiData, seoData, securityData] = await Promise.all([
-            fetchPageSpeedData(formattedUrl),
+        const [psiDataRaw, seoData, securityData] = await Promise.all([
+            withTimeout(fetchPageSpeedData(formattedUrl), 5000, "fetchPageSpeedData"),
             scanSeo(formattedUrl),
             scanSecurity(formattedUrl),
         ]);
+        const psiData =
+            psiDataRaw || {
+                performanceScore: 0,
+                accessibilityScore: 0,
+                bestPracticesScore: 0,
+                seoScore: 0,
+                details: {},
+            };
         console.log("[AuditAgent] Scanners completed", {
             formattedUrl,
             durationMs: Date.now() - scannersStart,
-            psiPresent: !!psiData,
+            psiPresent: !!psiDataRaw,
             seoTitlePresent: !!seoData?.title,
             securityIssuesCount: securityData?.securityIssues?.length,
             time: new Date().toISOString(),
@@ -92,10 +133,18 @@ export async function runFullAudit(url: string, userId: string) {
 
         // Generate AI Report
         const aiStart = Date.now();
-        const aiReportMarkdown = await generateAiReport(auditResults);
-        console.log("[AuditAgent] AI report generated", {
+        const aiReportMarkdownRaw = await withTimeout(
+            generateAiReport(auditResults),
+            8000,
+            "generateAiReport"
+        );
+        const aiReportMarkdown =
+            aiReportMarkdownRaw ||
+            `# Automated Audit Report\n\nThe detailed AI report could not be generated in time, but core audit metrics have been collected for ${formattedUrl}.`;
+        console.log("[AuditAgent] AI report generated (may be fallback)", {
             formattedUrl,
             durationMs: Date.now() - aiStart,
+            usedFallback: !aiReportMarkdownRaw,
             time: new Date().toISOString(),
         });
 
