@@ -6,17 +6,20 @@ interface SecurityIssue {
     description: string;
 }
 
-export async function scanSecurity(url: string) {
+export async function scanSecurity(url: string, preFetchedHeaders?: any) {
     try {
-        const response = await axios.head(url, {
-            timeout: 5000,
-            headers: {
-                "User-Agent":
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-            },
-        });
+        let headers = preFetchedHeaders;
 
-        const headers = response.headers;
+        if (!headers) {
+            const response = await axios.head(url, {
+                timeout: 5000,
+                headers: {
+                    "User-Agent":
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+                },
+            });
+            headers = response.headers;
+        }
         const issues: SecurityIssue[] = [];
         let score = 100;
 

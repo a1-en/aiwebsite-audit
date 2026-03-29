@@ -83,10 +83,10 @@ export async function runFullAudit(url: string, userId: string) {
         // Run Scanners in Parallel (Performance is the longest so we run it alongside)
         const scannersStart = Date.now();
         const [psiDataRaw, seoData, securityData] = await Promise.all([
-            // Give PageSpeed even more time so core vitals are more likely to be present
-            withTimeout(fetchPageSpeedData(formattedUrl), 15000, "fetchPageSpeedData"),
-            scanSeo(formattedUrl),
-            scanSecurity(formattedUrl),
+            // Give PageSpeed 40s to complete — it's slow but important
+            withTimeout(fetchPageSpeedData(formattedUrl), 40000, "fetchPageSpeedData"),
+            scanSeo(formattedUrl, html),
+            scanSecurity(formattedUrl, headers),
         ]);
         const psiData =
             psiDataRaw || {

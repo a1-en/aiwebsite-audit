@@ -43,8 +43,8 @@ export async function fetchPageSpeedData(url: string): Promise<PageSpeedResult> 
                 category: ["performance", "accessibility", "best-practices", "seo"],
                 strategy: "desktop",
             },
-            // Increased timeout: PSI is slow and 8s was causing frequent fallbacks
-            timeout: 45000,
+            // Increased timeout: PSI is slow and 45s was still causing frequent fallbacks
+            timeout: 50000,
         });
 
         const data = response.data.lighthouseResult;
